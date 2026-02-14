@@ -82,17 +82,41 @@ class _ShopPageState extends State<ShopPage> {
   _userId = 'user_${DateTime.now().millisecondsSinceEpoch}_${random.nextDouble().toString().substring(2, 11)}';
   _sessionId = 'session_${DateTime.now().millisecondsSinceEpoch}';
 }
-
-  void _getShopIdFromUrl() {
-    // In Flutter web, you can get URL parameters
-    // For this example, we'll use a placeholder or you can pass it as a parameter
-    // For web: Uri.base.queryParameters['id']
-    _shopId = 'your_shop_id_here'; // Replace with actual shop ID logic
-    if (_shopId != null) {
-      _loadShopBanner();
-      _loadInitialProducts();
-    } else {
+void _getShopIdFromUrl() {
+    try {
+      // Get the current URI
+      final uri = Uri.base;
+      
+      // Extract the 'id' parameter from the query string
+      final String? id = uri.queryParameters['id'];
+      
+      if (id != null && id.isNotEmpty) {
+        setState(() {
+          _shopId = id;
+        });
+        _loadShopBanner();
+        _loadInitialProducts();
+      } else {
+        // If no ID is provided, try to get it from the path (for cases like /shop/123)
+        final pathSegments = uri.pathSegments;
+        if (pathSegments.isNotEmpty) {
+          // You might want to handle different URL patterns here
+          // For now, we'll just show the not found state
+          setState(() {
+            _shopId = null;
+            _isInitialLoading = false;
+          });
+        } else {
+          setState(() {
+            _shopId = null;
+            _isInitialLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error parsing URL: $e');
       setState(() {
+        _shopId = null;
         _isInitialLoading = false;
       });
     }
